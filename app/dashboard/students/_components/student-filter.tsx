@@ -61,7 +61,8 @@ export function StudentsFilter({ prodiList, totalCount }: StudentsFilterProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
       <p className="text-sm text-gray-500">
-        <span className="font-semibold text-gray-900">{totalCount}</span>{" "}
+        <span className="font-semibold text-gray-900">{totalCount}</span>
+        {" "}
         mahasiswa terdaftar
       </p>
 
@@ -71,7 +72,7 @@ export function StudentsFilter({ prodiList, totalCount }: StudentsFilterProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Cari NIM atau nama..."
+            placeholder="Cari nama atau email..."
             defaultValue={currentSearch}
             onChange={handleSearch}
             className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"

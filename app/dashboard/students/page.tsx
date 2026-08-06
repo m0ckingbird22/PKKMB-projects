@@ -21,16 +21,16 @@ export default async function StudentsPage({
   const prodiFilter = searchParams.prodi ?? "";
   const page = Math.max(1, parseInt(searchParams.page ?? "1"));
 
-  // ── Query mahasiswa dengan filter ─────────────────────────────────────────
+  // ── Query mahasiswa dengan filter
   let query = supabase
-    .from("students")
-    .select("id, nim, nama, email, prodi:prodi_id(nama, fakultas)", {
+    .from("mahasiswa")
+    .select("id, nama, email, prodi:prodi_id(nama, fakultas)", {
       count: "exact",
     });
 
-  // Filter search: NIM atau nama (case-insensitive)
+  // Filter search: nama atau email (case-insensitive)
   if (search) {
-    query = query.or(`nim.ilike.%${search}%,nama.ilike.%${search}%`);
+    query = query.or(`nama.ilike.%${search}%,email.ilike.%${search}%`);
   }
 
   // Filter prodi
@@ -43,10 +43,10 @@ export default async function StudentsPage({
   const to = from + PAGE_SIZE - 1;
 
   const { data: students, count } = await query
-    .order("nim", { ascending: true })
+    .order("nama", { ascending: true })
     .range(from, to);
 
-  // ── Fetch semua prodi untuk dropdown filter ────────────────────────────────
+  // ── Fetch semua prodi untuk dropdown filter
   const { data: prodiList } = await supabase
     .from("prodi")
     .select("id, nama, fakultas")

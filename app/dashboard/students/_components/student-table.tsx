@@ -8,7 +8,6 @@ type ProdiData = { nama: string; fakultas: string };
 
 interface Student {
   id: string;
-  nim: string;
   nama: string;
   email: string | null;
   prodi: ProdiData | ProdiData[] | null;
@@ -68,10 +67,10 @@ export function StudentsTable({
                 No
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                NIM
+                Nama
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Nama
+                Email
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Program Studi
@@ -92,11 +91,11 @@ export function StudentsTable({
                   <td className="px-4 py-3 text-gray-400 text-xs">
                     {(page - 1) * pageSize + index + 1}
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs font-medium text-gray-700">
-                    {student.nim}
-                  </td>
                   <td className="px-4 py-3 font-medium text-gray-900">
                     {student.nama}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 text-sm">
+                    {student.email ?? "-"}
                   </td>
                   <td className="px-4 py-3 text-indigo-600 font-medium">
                     {prodi?.nama ?? "-"}
