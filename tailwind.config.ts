@@ -11,6 +11,9 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        ember : "#F5E26C",
+        twilight : "#801831",
+        inferno : "#C71A2D",
       },
     },
   },
