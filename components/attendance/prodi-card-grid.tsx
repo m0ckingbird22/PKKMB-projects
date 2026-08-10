@@ -45,7 +45,7 @@ export function ProdiCardGrid({
               className={`text-left rounded-lg border p-4 transition-colors ${cardClass}`}
             >
               <span className="flex items-start justify-between gap-2">
-                <span className="font-semibold text-gray-900 text-smleading-tight">
+                <span className="font-semibold text-gray-900 text-sm leading-tight">
                   {prodi.nama}
                 </span>
                 <span
