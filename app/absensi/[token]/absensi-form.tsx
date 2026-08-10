@@ -128,10 +128,10 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
       <div className="flex min-h-screen items-center justify-center px-4">
         <div className="text-center">
           <h1 className="text-xl font-semibold text-green-600">
-            Absensi Berhasil ✅
+            Absensi Berhasil !
           </h1>
           <p className="mt-2 text-gray-600">
-            {selectedStudent?.nama} — Hari {day} — Mode {mode}
+            {selectedStudent?.nama} — Hari ke {day} PKKMB
           </p>
         </div>
       </div>
