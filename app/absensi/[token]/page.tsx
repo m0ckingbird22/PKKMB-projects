@@ -1,5 +1,5 @@
 import {createClient} from "@/lib/supabase-server"
-        import AbsensiForm from "./absensi-form"
+import AbsensiForm from "./absensi-form"
 
 interface PageProps {
     params: {token : string}
@@ -9,7 +9,7 @@ export default async function AbsensiPage ({params}: PageProps) {
     const  supabase = await createClient()
 
     const {data: session,error} = await supabase
-    .from('qr_sessions')
+    .from('qr_session')
     .select('day, is_active')
     .eq('token',params.token)
     .single()
