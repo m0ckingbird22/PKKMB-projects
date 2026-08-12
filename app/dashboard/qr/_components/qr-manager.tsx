@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "react-hot-toast";
-import { Plus, StopCircle, Loader2 } from "lucide-react";
+import { Plus, StopCircle, Loader2, Trash2 } from "lucide-react";
 
 type Session = {
   id: string;
@@ -24,6 +24,7 @@ export function QrManager({ sessions: initial, origin }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [day, setDay] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   const active = initial.filter((s) => s.is_active);
   const history = initial.filter((s) => !s.is_active);
@@ -55,6 +56,26 @@ export function QrManager({ sessions: initial, origin }: Props) {
       router.refresh();
     } else {
       toast.error("Gagal mengakhiri sesi");
+    }
+  };
+
+  const clearHistory = async () => {
+    if (
+      !confirm("hapus semua riwayat sesi? tindakan ini tidak bisa di batalkan")
+    ) {
+      return;
+    }
+    setClearing(true);
+    try {
+      const res = await fetch("/api/qr/history", { method: "DELETE" });
+      if (!res.ok) throw new Error(await res.text());
+      toast.success("Riwayat berhasil dihapus");
+      router.refresh();
+    } catch (e) {
+      console.error("Gagal menghapus riwayat", e);
+      toast.error("Gagal menghapus riwayat");
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -148,7 +169,21 @@ export function QrManager({ sessions: initial, origin }: Props) {
       {/* Riwayat */}
       {history.length > 0 && (
         <section>
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">RIWAYAT</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-gray-700">RIWAYAT</h2>
+            <button
+              onClick={clearHistory}
+              disabled={clearing}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-xs text-gray-600 hover:border-inferno hover:text-inferno disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {clearing ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Trash2 className="h-3 w-3" />
+              )}
+              Hapus Riwayat
+            </button>
+          </div>
           <div className="bg-white rounded-xl border divide-y">
             {history.map((s) => (
               <div
@@ -157,7 +192,10 @@ export function QrManager({ sessions: initial, origin }: Props) {
               >
                 <div>
                   <p className="font-mono text-sm font-medium">{s.token}</p>
-                  <p className="text-xs text-gray-500">Day {s.day}</p>
+                  <p className="text-xs text-gray-500">
+                    Day
+                    {s.day}
+                  </p>
                 </div>
                 <span className="text-xs text-gray-400">Selesai</span>
               </div>
