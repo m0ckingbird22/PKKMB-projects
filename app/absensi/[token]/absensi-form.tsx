@@ -46,7 +46,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
       setSearching(true);
       try {
         const res = await fetch(
-          `/api/students/search?q=${encodeURIComponent(query)}`,
+          `/api/students/search?q=${encodeURIComponent(query)}&day=${day}`,
         );
         const data = await res.json();
         setResults(data.students || []);
@@ -125,12 +125,24 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-ember/20 to-white px-4">
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-green-600">
-            Absensi Berhasil !
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-twilight">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8 text-ember"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={3}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-twilight">
+            Absensi Berhasil!
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-gray-700">
             {selectedStudent?.nama} — Hari ke {day} PKKMB
           </p>
         </div>
@@ -139,28 +151,36 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-8">
-      <h1 className="mb-1 text-lg font-semibold">Absensi PKKMB — Hari {day}</h1>
-      <p className="mb-6 text-sm text-gray-500">
-        Isi form berikut untuk mencatat kehadiran.
-      </p>
+    <div className="min-h-screen bg-gradient-to-b from-ember/20 to-white px-4 py-8">
+      <div className="mx-auto max-w-md">
+        <div className="mb-6">
+          <span className="inline-block rounded-full bg-ember px-3 py-1 text-xs font-bold uppercase tracking-wide text-twilight">
+            Hari {day}
+          </span>
+          <h1 className="mt-3 text-2xl font-bold text-twilight">
+            Absensi PKKMB
+          </h1>
+          <p className="mt-1 text-sm text-gray-600">
+            Isi form berikut untuk mencatat kehadiran.
+          </p>
+        </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Search nama */}
         <div>
           <label className="mb-1 block text-sm font-medium">Nama Kamu</label>
           {selectedStudent ? (
-            <div className="flex items-center justify-between rounded border border-gray-300 px-3 py-2">
+            <div className="flex items-center justify-between rounded-lg border-2 border-twilight bg-ember/20 px-3 py-2">
               <div>
-                <p className="font-medium">{selectedStudent.nama}</p>
-                <p className="text-sm text-gray-500">
+                <p className="font-semibold text-twilight">{selectedStudent.nama}</p>
+                <p className="text-sm text-gray-700">
                   {selectedStudent.prodi_nama}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleChangeStudent}
-                className="text-sm text-blue-600 underline"
+                className="rounded px-2 py-1 text-sm font-medium text-twilight transition hover:bg-twilight hover:text-white"
               >
                 Ganti
               </button>
@@ -172,19 +192,19 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Ketik nama kamu..."
-                className="w-full rounded border border-gray-300 px-3 py-2"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none transition focus:border-twilight focus:ring-2 focus:ring-twilight/20"
                 autoComplete="off"
               />
               {searching && (
                 <p className="mt-1 text-xs text-gray-400">Mencari...</p>
               )}
               {results.length > 0 && (
-                <ul className="absolute z-10 mt-1 w-full rounded border border-gray-200 bg-white shadow-lg">
+                <ul className="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg">
                   {results.map((s) => (
                     <li
                       key={s.id}
                       onClick={() => handleSelectStudent(s)}
-                      className="cursor-pointer px-3 py-2 hover:bg-gray-100"
+                      className="cursor-pointer px-3 py-2 transition hover:bg-ember/30"
                     >
                       <p className="font-medium">{s.nama}</p>
                       <p className="text-sm text-gray-500">{s.prodi_nama}</p>
@@ -205,10 +225,10 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
             <button
               type="button"
               onClick={() => setMode("offline")}
-              className={`flex-1 rounded border px-4 py-2 ${
+              className={`flex-1 rounded-lg border-2 px-4 py-2 font-medium transition ${
                 mode === "offline"
-                  ? "border-blue-600 bg-blue-50 text-blue-600"
-                  : "border-gray-300"
+                  ? "border-twilight bg-twilight text-white"
+                  : "border-gray-300 text-gray-700 hover:border-twilight/50"
               }`}
             >
               Offline
@@ -216,10 +236,10 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
             <button
               type="button"
               onClick={() => setMode("online")}
-              className={`flex-1 rounded border px-4 py-2 ${
+              className={`flex-1 rounded-lg border-2 px-4 py-2 font-medium transition ${
                 mode === "online"
-                  ? "border-blue-600 bg-blue-50 text-blue-600"
-                  : "border-gray-300"
+                  ? "border-twilight bg-twilight text-white"
+                  : "border-gray-300 text-gray-700 hover:border-twilight/50"
               }`}
             >
               Online
@@ -249,16 +269,21 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
           )}
         </div>
 
-        {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
+        {errorMsg && (
+          <p className="rounded-lg bg-inferno/10 px-3 py-2 text-sm font-medium text-inferno">
+            {errorMsg}
+          </p>
+        )}
 
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded bg-blue-600 py-3 font-medium text-white disabled:opacity-50"
+          className="w-full rounded-lg bg-twilight py-3 font-semibold text-white transition hover:bg-inferno disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? "Mengirim..." : "Submit Absensi"}
         </button>
       </form>
+      </div>
     </div>
   );
 }
