@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-admin";
 
 export async function POST(req: NextRequest) {
-  const supabase = createAdminClient(); // service_role, bypass RLS
+  const supabase = createAdminClient(); //
 
   const formData = await req.formData();
   const token = formData.get("token") as string;
@@ -74,6 +74,17 @@ export async function POST(req: NextRequest) {
 
   if (insertError) {
     console.error("Insert error:", insertError);
+
+    if (insertError.code === "23505") {
+      return NextResponse.json(
+        {
+          error:
+            "Kamu sudah absen hari ini. Hubungi panitia jika ada kesalahan.",
+        },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json(
       { error: "Gagal simpan absensi" },
       { status: 500 },
