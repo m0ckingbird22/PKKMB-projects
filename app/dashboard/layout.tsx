@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase-server";
+import { createClient, getUserIdFromHeader } from "@/lib/supabase-server";
 import { Sidebar } from "@/components/dashboard/sidebar";
 
 export default async function DashboardLayout({
@@ -7,21 +7,17 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
+  const userId = await getUserIdFromHeader();
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
+  if (!userId) {
     redirect("/login");
   }
 
+  const supabase = await createClient();
   const { data: panitia, error: panitiaError } = await supabase
     .from("panitia")
     .select("nama, role")
-    .eq("id", user.id) // ← non-null assertion
+    .eq("id", userId)
     .single();
 
   if (panitiaError || !panitia) {
