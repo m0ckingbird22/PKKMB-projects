@@ -15,18 +15,33 @@ type AttendanceRow = {
 
 export const dynamic = "force-dynamic";
 
-export default async function AttendancePage() {
+export default async function AttendancePage({
+  searchParams,
+}: {
+  searchParams: { day?: string };
+}) {
   const supabase = await createClient();
 
-  // Ambil sesi terbaru untuk default day
-  const { data: latestSession } = await supabase
-    .from("qr_session")
-    .select("day")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
+const urlDay = searchParams.day ?
+  Number(searchParams.day) : null;
+    const isValidDay =
+      urlDay !== null && !isNaN(urlDay) && urlDay >= 1 &&
+  urlDay <= 6;
 
-  const currentDay = latestSession?.day ?? 1;
+    let currentDay: number;
+    if (isValidDay) {
+      // Fast path: URL sudah specify day, ga perlu query session
+      currentDay = urlDay as number;
+    } else {
+      // Slow path: ambil day dari sesi terbaru
+      const { data: latestSession } = await supabase
+        .from("qr_session")
+        .select("day")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+      currentDay = latestSession?.day ?? 1;
+    }
 
   // Fetch attendance hari itu, join mahasiswa + prodi
   const { data: records } = await supabase
@@ -87,10 +102,8 @@ export default async function AttendancePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Absensi Real-time</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Hari {currentDay} • Auto-update tiap mahasiswa submit
-        </p>
+        <h1 className="text-2xl font-bold text-gray-900">Absensi</h1>
+        <p className="text-gray-500 text-sm mt-1">Hari {currentDay}</p>
       </div>
 
       <AttendanceView
