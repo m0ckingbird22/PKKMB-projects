@@ -11,6 +11,7 @@ type Session = {
   token: string;
   day: number;
   is_active: boolean | null;
+  type: string | null;
   created_at: string | null;
 };
 
@@ -23,6 +24,7 @@ export function QrManager({ sessions: initial, origin }: Props) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [day, setDay] = useState(1);
+  const [type, setType] = useState<"absensi" | "feedback">("absensi");
   const [loading, setLoading] = useState(false);
   const [clearing, setClearing] = useState(false);
 
@@ -35,7 +37,7 @@ export function QrManager({ sessions: initial, origin }: Props) {
       const res = await fetch("/api/qr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ day }),
+        body: JSON.stringify({ day, type }),
       });
       if (!res.ok) throw new Error(await res.text());
       toast.success("Sesi berhasil dibuat");
@@ -48,6 +50,9 @@ export function QrManager({ sessions: initial, origin }: Props) {
       setLoading(false);
     }
   };
+
+  const sessionUrl = (s: Session) =>
+    `${origin}/${s.type === "feedback" ? "feedback" : "absensi"}/${s.token}`;
 
   const endSession = async (id: string) => {
     const res = await fetch(`/api/qr/${id}`, { method: "PATCH" });
@@ -94,6 +99,33 @@ export function QrManager({ sessions: initial, origin }: Props) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl p-6 w-80 space-y-4">
             <h2 className="text-lg font-semibold">Buat Sesi QR</h2>
+            <div>
+              <span className="block text-sm text-gray-700 mb-1">Tipe Sesi</span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setType("absensi")}
+                  className={`flex-1 rounded-lg border-2 px-3 py-2 text-sm font-medium transition ${
+                    type === "absensi"
+                      ? "border-twilight bg-twilight text-white"
+                      : "border-gray-300 text-gray-700 hover:border-twilight/50"
+                  }`}
+                >
+                  Absensi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setType("feedback")}
+                  className={`flex-1 rounded-lg border-2 px-3 py-2 text-sm font-medium transition ${
+                    type === "feedback"
+                      ? "border-twilight bg-twilight text-white"
+                      : "border-gray-300 text-gray-700 hover:border-twilight/50"
+                  }`}
+                >
+                  Feedback
+                </button>
+              </div>
+            </div>
             <label className="block text-sm">
               <span className="text-gray-700">Hari PKKMB</span>
               <select
@@ -141,11 +173,16 @@ export function QrManager({ sessions: initial, origin }: Props) {
               >
                 <div className="flex justify-center bg-white p-4 rounded-lg">
                   <QRCodeSVG
-                    value={`${origin}/absensi/${s.token}`}
+                    value={sessionUrl(s)}
                     size={220}
                   />
                 </div>
                 <div className="text-center space-y-1">
+                  <div className="flex justify-center gap-2">
+                    <span className="inline-block rounded-full bg-ember/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-twilight">
+                      {s.type === "feedback" ? "Feedback" : "Absensi"}
+                    </span>
+                  </div>
                   <p className="font-mono text-lg font-bold text-twilight">
                     {s.token}
                   </p>
@@ -191,11 +228,13 @@ export function QrManager({ sessions: initial, origin }: Props) {
                 className="flex items-center justify-between px-4 py-3"
               >
                 <div>
-                  <p className="font-mono text-sm font-medium">{s.token}</p>
-                  <p className="text-xs text-gray-500">
-                    Day
-                    {s.day}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono text-sm font-medium">{s.token}</p>
+                    <span className="rounded-full bg-ember/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-twilight">
+                      {s.type === "feedback" ? "Feedback" : "Absensi"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500">Day {s.day}</p>
                 </div>
                 <span className="text-xs text-gray-400">Selesai</span>
               </div>

@@ -8,7 +8,7 @@ export default async function QrPage() {
 
 const { data: sessions } = await supabase
     .from("qr_session")
-    .select("id, token, day, is_active, created_at, created_by")
+    .select("id, token, day, is_active, type, created_at, created_by")
     .order("created_at", { ascending: false })
     .limit(20);
 
