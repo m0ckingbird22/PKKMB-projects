@@ -210,6 +210,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           token: string
+          type: string
         }
         Insert: {
           created_at?: string | null
@@ -218,6 +219,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           token: string
+          type?: string
         }
         Update: {
           created_at?: string | null
@@ -226,6 +228,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           token?: string
+          type?: string
         }
         Relationships: [
           {
