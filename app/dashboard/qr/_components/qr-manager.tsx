@@ -234,7 +234,7 @@ export function QrManager({ sessions: initial, origin }: Props) {
 
       {initial.length === 0 && (
         <div className="text-center py-12 text-gray-400">
-          Belum ada sesi. Klik {"'Buat Sesi Baru'"} untuk memulai.
+          Klik {"'Buat Sesi Baru'"} untuk memulai.
         </div>
       )}
     </div>
