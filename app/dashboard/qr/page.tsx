@@ -15,8 +15,8 @@ const { data: sessions } = await supabase
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">QR Code Absensi</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-white">QR Code Absensi</h1>
+          <p className="text-gray-400 text-sm mt-1">
             Buat sesi QR untuk absensi mahasiswa PKKMB
           </p>
         </div>

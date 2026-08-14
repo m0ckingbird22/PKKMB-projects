@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "react-hot-toast";
 import { Plus, StopCircle, Loader2, Trash2 } from "lucide-react";
+import { DayPicker } from "@/components/dashboard/day-picker";
 
 type Session = {
   id: string;
@@ -89,18 +90,20 @@ export function QrManager({ sessions: initial, origin }: Props) {
       {/* Tombol buat sesi */}
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-2 rounded-lg bg-twilight px-4 py-2 text-sm font-medium text-white hover:bg-inferno"
+        className="inline-flex items-center gap-2 rounded-lg bg-twilight px-4 py-2 text-sm font-medium text-white hover:bg-ember"
       >
         <Plus className="h-4 w-4" /> Buat Sesi Baru
       </button>
 
       {/* Modal form */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl p-6 w-80 space-y-4">
-            <h2 className="text-lg font-semibold">Buat Sesi QR</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <div className="bg-[#1d1c1c] border border-gray-800 rounded-lg p-6 w-[90vw] max-w-sm space-y-4">
+            <h2 className="text-lg font-semibold text-white">Buat Sesi QR</h2>
             <div>
-              <span className="block text-sm text-gray-700 mb-1">Tipe Sesi</span>
+              <span className="block text-sm text-gray-300 mb-1">
+                Tipe Sesi
+              </span>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -108,7 +111,7 @@ export function QrManager({ sessions: initial, origin }: Props) {
                   className={`flex-1 rounded-lg border-2 px-3 py-2 text-sm font-medium transition ${
                     type === "absensi"
                       ? "border-twilight bg-twilight text-white"
-                      : "border-gray-300 text-gray-700 hover:border-twilight/50"
+                      : "border-gray-700 text-gray-300 hover:border-twilight/50"
                   }`}
                 >
                   Absensi
@@ -119,31 +122,18 @@ export function QrManager({ sessions: initial, origin }: Props) {
                   className={`flex-1 rounded-lg border-2 px-3 py-2 text-sm font-medium transition ${
                     type === "feedback"
                       ? "border-twilight bg-twilight text-white"
-                      : "border-gray-300 text-gray-700 hover:border-twilight/50"
+                      : "border-gray-700 text-gray-300 hover:border-twilight/50"
                   }`}
                 >
                   Feedback
                 </button>
               </div>
             </div>
-            <label className="block text-sm">
-              <span className="text-gray-700">Hari PKKMB</span>
-              <select
-                value={day}
-                onChange={(e) => setDay(Number(e.target.value))}
-                className="mt-1 w-full rounded-lg border px-3 py-2"
-              >
-                {Array.from({ length: 6 }, (_, i) => i + 1).map((d) => (
-                  <option key={d} value={d}>
-                    Hari {d}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <DayPicker value={day} onChange={setDay} label="Hari PKKMB" />
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setIsOpen(false)}
-                className="px-3 py-2 text-sm"
+                className="px-3 py-2 text-sm text-gray-400 hover:text-white"
               >
                 Batal
               </button>
@@ -162,31 +152,28 @@ export function QrManager({ sessions: initial, origin }: Props) {
       {/* Sesi aktif */}
       {active.length > 0 && (
         <section>
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">
+          <h2 className="text-sm font-semibold text-gray-300 mb-3">
             SESI AKTIF
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {active.map((s) => (
               <div
                 key={s.id}
-                className="bg-white rounded-xl border p-6 space-y-4"
+                className="bg-[#1d1c1c] rounded-lg border border-gray-800 p-6 space-y-4"
               >
                 <div className="flex justify-center bg-white p-4 rounded-lg">
-                  <QRCodeSVG
-                    value={sessionUrl(s)}
-                    size={220}
-                  />
+                  <QRCodeSVG value={sessionUrl(s)} size={220} />
                 </div>
                 <div className="text-center space-y-1">
                   <div className="flex justify-center gap-2">
-                    <span className="inline-block rounded-full bg-ember/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-twilight">
+                    <span className="inline-block rounded-full bg-ember/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ember">
                       {s.type === "feedback" ? "Feedback" : "Absensi"}
                     </span>
                   </div>
-                  <p className="font-mono text-lg font-bold text-twilight">
+                  <p className="font-mono text-lg font-bold text-white">
                     {s.token}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-400">
                     Day {s.day} •{" "}
                     {new Date(s.created_at ?? "").toLocaleString("id-ID")}
                   </p>
@@ -207,11 +194,11 @@ export function QrManager({ sessions: initial, origin }: Props) {
       {history.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-gray-700">RIWAYAT</h2>
+            <h2 className="text-sm font-semibold text-gray-300">RIWAYAT</h2>
             <button
               onClick={clearHistory}
               disabled={clearing}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-xs text-gray-600 hover:border-inferno hover:text-inferno disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:border-inferno hover:text-inferno disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {clearing ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -221,7 +208,7 @@ export function QrManager({ sessions: initial, origin }: Props) {
               Hapus Riwayat
             </button>
           </div>
-          <div className="bg-white rounded-xl border divide-y">
+          <div className="bg-[#1d1c1c] rounded-lg border border-gray-800 divide-y divide-gray-800">
             {history.map((s) => (
               <div
                 key={s.id}
@@ -229,14 +216,16 @@ export function QrManager({ sessions: initial, origin }: Props) {
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-mono text-sm font-medium">{s.token}</p>
-                    <span className="rounded-full bg-ember/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-twilight">
+                    <p className="font-mono text-sm font-medium text-white">
+                      {s.token}
+                    </p>
+                    <span className="rounded-full bg-ember/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ember">
                       {s.type === "feedback" ? "Feedback" : "Absensi"}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500">Day {s.day}</p>
+                  <p className="text-xs text-gray-400">Day {s.day}</p>
                 </div>
-                <span className="text-xs text-gray-400">Selesai</span>
+                <span className="text-xs text-gray-500">Selesai</span>
               </div>
             ))}
           </div>
@@ -244,7 +233,7 @@ export function QrManager({ sessions: initial, origin }: Props) {
       )}
 
       {initial.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-gray-400">
           Belum ada sesi. Klik {"'Buat Sesi Baru'"} untuk memulai.
         </div>
       )}
