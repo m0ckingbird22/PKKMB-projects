@@ -18,28 +18,29 @@ export function StatCards({
       label: "Total Hadir",
       value: totalHadir,
       icon: Users,
-      iconColor: "text-indigo-600",
+      iconBg: "bg-ember",
+      iconColor: "text-inferno",
     },
     {
       label: "offline",
       value: offline,
       icon: MapPin,
-      iconBg: "bg-emerald-50",
-      iconColor: "text-emerald-600",
+      iconBg: "bg-ember",
+      iconColor: "text-inferno",
     },
     {
       label: "online",
       value: online,
       icon: Monitor,
-      iconBg: "bg-sky-50",
-      iconColor: "text-sky-600",
+      iconBg: "bg-ember",
+      iconColor: "text-inferno",
     },
     {
       label: "flagged",
       value: flagged,
       icon: Flag,
-      iconBg: "bg-amber-50",
-      iconColor: "text-amber-600",
+      iconBg: "bg-ember",
+      iconColor: "text-inferno",
     },
   ];
   return (
@@ -47,16 +48,15 @@ export function StatCards({
       {cards.map(({ label, value, icon: Icon, iconBg, iconColor }) => (
         <div
           key={label}
-          className="bg-white rounded-lg border border-gray-200 p-5"
+          className="bg-[#1d1c1c] rounded-lg border border-gray-800 p-5"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500">{label}</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+              <p className="text-sm font-medium text-gray-400">{label}</p>
+              <p className="text-2xl font-bold text-white mt-1">{value}</p>
             </div>
             <div
-              className={`h-10 w-10 rounded-lg flex items-center justify-center 
-  ${iconBg}`}
+              className={`h-10 w-10 rounded-lg flex items-center justify-center ${iconBg}`}
             >
               <Icon className={`h-5 w-5 ${iconColor}`} />
             </div>

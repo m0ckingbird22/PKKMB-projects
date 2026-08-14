@@ -8,6 +8,7 @@ import { ProdiCardGrid } from "@/components/attendance/prodi-card-grid";
 import { MahasiswaTable } from "@/components/attendance/mahasiswa-table";
 import type { AttendanceRecord, ProdiStat } from "@/lib/types";
 import { useState } from "react";
+import { DayPicker } from "@/components/dashboard/day-picker";
 
 interface Props {
   initialRecords: AttendanceRecord[];
@@ -68,28 +69,11 @@ export function AttendanceView({
   return (
     <div className="space-y-6">
       {/* Filter hari */}
-      <div>
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">PILIH HARI</h2>
-        <div className="flex flex-wrap gap-2">
-          {Array.from({ length: 6 }, (_, i) => i + 1).map((d) => (
-            <button
-              key={d}
-              onClick={() => selectDay(d)}
-              className={`rounded-lg border px-4 py-2 text-sm font-medium transition ${
-                d === day
-                  ? "border-twilight bg-twilight  text-white"
-                  : "border-gray-300 text-gray-600 hover:border-twilight hover:text-twilight"
-              }`}
-            >
-              Hari {d}
-            </button>
-          ))}
-        </div>
-      </div>
+      <DayPicker value={day} onChange={selectDay} />
       <StatCards {...stats} />
 
       <div>
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">
+        <h2 className="text-sm font-semibold text-gray-300 mb-3">
           FILTER PRODI
         </h2>
         <ProdiCardGrid
@@ -100,7 +84,7 @@ export function AttendanceView({
       </div>
 
       <div>
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">
+        <h2 className="text-sm font-semibold text-gray-300 mb-3">
           DAFTAR HADIR {activeProdi && `• ${activeProdi}`}
         </h2>
         <MahasiswaTable records={filtered} />

@@ -6,10 +6,11 @@ type AttendanceRow = {
   mode: string;
   submitted_at: string | null;
   is_flagged: boolean | null;
+  flag_reason: string | null;
   foto_url: string;
   mahasiswa: {
     nama: string;
-    prodi: { nama: string; fakultas: string | null } | null;
+    prodi: { nama: string } | null;
   } | null;
 };
 
@@ -52,8 +53,9 @@ const urlDay = searchParams.day ?
         mode,
         submitted_at,
         is_flagged,
+        flag_reason,
         foto_url,
-        mahasiswa:mahasiswa_id (nama, prodi:prodi_id (nama, fakultas))
+        mahasiswa:mahasiswa_id (nama, prodi:prodi_id (nama))
       `,
     )
     .eq("day", currentDay)
@@ -66,16 +68,11 @@ const urlDay = searchParams.day ?
   const flagged = all.filter((r) => r.is_flagged).length;
 
   // Group per prodi
-  const prodiMap = new Map<
-    string,
-    { nama: string; fakultas: string; jumlah: number }
-  >();
+  const prodiMap = new Map<string, { nama: string; jumlah: number }>();
   for (const r of all) {
     const prodiNama = r.mahasiswa?.prodi?.nama ?? "Lainnya";
-    const fakultas = r.mahasiswa?.prodi?.fakultas ?? "-";
     const existing = prodiMap.get(prodiNama) ?? {
       nama: prodiNama,
-      fakultas,
       jumlah: 0,
     };
     existing.jumlah += 1;
@@ -87,7 +84,6 @@ const urlDay = searchParams.day ?
     id: r.id,
     nama: r.mahasiswa?.nama ?? "-",
     prodi: r.mahasiswa?.prodi?.nama ?? "-",
-    fakultas: r.mahasiswa?.prodi?.fakultas ?? "-",
     mode: r.mode as "offline" | "online",
     waktuAbsen: r.submitted_at
       ? new Date(r.submitted_at).toLocaleTimeString("id-ID", {
@@ -96,14 +92,15 @@ const urlDay = searchParams.day ?
         })
       : "-",
     status: r.is_flagged ? ("flagged" as const) : ("hadir" as const),
+    flagReason: r.flag_reason,
     fotoUrl: r.foto_url,
   }));
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Absensi</h1>
-        <p className="text-gray-500 text-sm mt-1">Hari {currentDay}</p>
+        <h1 className="text-2xl font-bold text-white">Absensi</h1>
+        <p className="text-gray-400 text-sm mt-1">Hari {currentDay}</p>
       </div>
 
       <AttendanceView
