@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { Camera, Image as ImageIcon, X } from "lucide-react";
 
 interface AbsensiFormProps {
   day: number;
@@ -33,6 +34,80 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
   const [success, setSuccess] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // State kamera
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  function stopCamera() {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+  }
+
+  async function openCamera() {
+    setCameraError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      setCameraOpen(true);
+    } catch {
+      setCameraError(
+        "Tidak bisa mengakses kamera. Beri izin kamera di browser, atau gunakan tombol galeri.",
+      );
+    }
+  }
+
+  // Pasang stream ke <video> setelah overlay kamera ter-render
+  useEffect(() => {
+    if (cameraOpen && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [cameraOpen]);
+
+  // Matikan kamera kalau komponen unmount
+  useEffect(() => stopCamera, []);
+
+  function closeCamera() {
+    stopCamera();
+    setCameraOpen(false);
+  }
+
+  function capturePhoto() {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+        const file = new File([blob], `absensi-${Date.now()}.jpg`, {
+          type: "image/jpeg",
+        });
+        setPhoto(file);
+        setPhotoPreview(URL.createObjectURL(file));
+        closeCamera();
+      },
+      "image/jpeg",
+      0.9,
+    );
+  }
+
+  function handleRetakePhoto() {
+    setPhoto(null);
+    setPhotoPreview(null);
+  }
 
   // Debounced search — biar gak hit API tiap ketikan
   useEffect(() => {
@@ -125,24 +200,26 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-ember/20 to-white px-4">
+      <div className="flex min-h-screen items-center justify-center bg-black bg-[radial-gradient(circle_at_top_right,#801831_0%,#2E0712_25%,transparent_60%),radial-gradient(circle_at_bottom_left,#801831_0%,#2E0712_25%,transparent_60%)] px-4">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-twilight">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-inferno">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-8 w-8 text-ember"
+              className="h-8 w-8 text-white"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
               strokeWidth={3}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-twilight">
-            Absensi Berhasil!
-          </h1>
-          <p className="mt-2 text-gray-700">
+          <h1 className="text-2xl font-bold text-white">Absensi Berhasil!</h1>
+          <p className="mt-2 text-gray-400">
             {selectedStudent?.nama} — Hari ke {day} PKKMB
           </p>
         </div>
@@ -151,139 +228,212 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-ember/20 to-white px-4 py-8">
+    <div className="min-h-screen bg-black bg-[radial-gradient(circle_at_top_right,#801831_0%,#2E0712_25%,transparent_60%),radial-gradient(circle_at_bottom_left,#801831_0%,#2E0712_25%,transparent_60%)] px-4 py-8">
       <div className="mx-auto max-w-md">
         <div className="mb-6">
-          <span className="inline-block rounded-full bg-ember px-3 py-1 text-xs font-bold uppercase tracking-wide text-twilight">
+          <span className="inline-block rounded-full bg-twilight px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
             Hari {day}
           </span>
-          <h1 className="mt-3 text-2xl font-bold text-twilight">
-            Absensi PKKMB
+          <h1 className="mt-3 text-2xl font-bold text-ember">
+            Absensi PKKMB SPARK
           </h1>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-ember/70">
             Isi form berikut untuk mencatat kehadiran.
           </p>
         </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Search nama */}
-        <div>
-          <label className="mb-1 block text-sm font-medium">Nama Kamu</label>
-          {selectedStudent ? (
-            <div className="flex items-center justify-between rounded-lg border-2 border-twilight bg-ember/20 px-3 py-2">
-              <div>
-                <p className="font-semibold text-twilight">{selectedStudent.nama}</p>
-                <p className="text-sm text-gray-700">
-                  {selectedStudent.prodi_nama}
-                </p>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Search nama */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-ember/80">
+              Nama Kamu
+            </label>
+            {selectedStudent ? (
+              <div className="flex items-center justify-between rounded-lg border-2 border-inferno bg-inferno/10 px-3 py-2">
+                <div>
+                  <p className="font-semibold text-white">
+                    {selectedStudent.nama}
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    {selectedStudent.prodi_nama}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleChangeStudent}
+                  className="rounded px-2 py-1 text-sm font-medium text-inferno transition hover:bg-inferno hover:text-white"
+                >
+                  Ganti
+                </button>
               </div>
+            ) : (
+              <div className="relative">
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Ketik nama kamu..."
+                  className="w-full rounded-lg border border-gray-700 bg-[#1d1c1c] px-3 py-2 text-white placeholder-gray-500 outline-none transition focus:border-inferno focus:ring-2 focus:ring-inferno/20"
+                  autoComplete="off"
+                />
+                {searching && (
+                  <p className="mt-1 text-xs text-ember">Mencari...</p>
+                )}
+                {results.length > 0 && (
+                  <ul className="absolute z-10 mt-1 w-full rounded-lg border border-gray-700 bg-[#1d1c1c] shadow-xl">
+                    {results.map((s) => (
+                      <li
+                        key={s.id}
+                        onClick={() => handleSelectStudent(s)}
+                        className="cursor-pointer px-3 py-2 transition hover:bg-inferno/20"
+                      >
+                        <p className="font-medium text-white">{s.nama}</p>
+                        <p className="text-sm text-gray-500">{s.prodi_nama}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Mode kehadiran */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-ember/80">
+              Mode Kehadiran
+            </label>
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={handleChangeStudent}
-                className="rounded px-2 py-1 text-sm font-medium text-twilight transition hover:bg-twilight hover:text-white"
+                onClick={() => setMode("offline")}
+                className={`rounded-md border-2 py-2 text-sm font-bold transition ${
+                  mode === "offline"
+                    ? "border-inferno bg-inferno/30 text-white"
+                    : "border-gray-700 text-gray-300 hover:border-twilight hover:bg-twilight/30"
+                }`}
               >
-                Ganti
+                Offline
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("online")}
+                className={`rounded-md border-2 py-2 text-sm font-bold transition ${
+                  mode === "online"
+                    ? "border-inferno bg-inferno/30 text-white"
+                    : "border-gray-700 text-gray-300 hover:border-twilight hover:bg-twilight/30"
+                }`}
+              >
+                Online
               </button>
             </div>
-          ) : (
-            <div className="relative">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ketik nama kamu..."
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none transition focus:border-twilight focus:ring-2 focus:ring-twilight/20"
-                autoComplete="off"
-              />
-              {searching && (
-                <p className="mt-1 text-xs text-gray-400">Mencari...</p>
-              )}
-              {results.length > 0 && (
-                <ul className="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg">
-                  {results.map((s) => (
-                    <li
-                      key={s.id}
-                      onClick={() => handleSelectStudent(s)}
-                      className="cursor-pointer px-3 py-2 transition hover:bg-ember/30"
-                    >
-                      <p className="font-medium">{s.nama}</p>
-                      <p className="text-sm text-gray-500">{s.prodi_nama}</p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-        </div>
+          </div>
 
-        {/* Mode kehadiran */}
-        <div>
-          <label className="mb-1 block text-sm font-medium">
-            Mode Kehadiran
-          </label>
-          <div className="flex gap-3">
+          {/* Upload foto */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-ember/80">
+              {mode === "online" ? "Screenshot Zoom" : "Bukti foto kehadiran"}
+            </label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="hidden"
+            />
+            {photoPreview ? (
+              <div>
+                <img
+                  src={photoPreview}
+                  alt="Preview"
+                  className="h-40 w-full rounded-lg border border-gray-700 object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={handleRetakePhoto}
+                  className="mt-2 text-sm font-medium text-inferno transition hover:text-ember"
+                >
+                  Ulangi ambil foto
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                {mode !== "online" && (
+                  <button
+                    type="button"
+                    onClick={openCamera}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-inferno py-2.5 text-sm font-semibold text-white transition hover:bg-inferno/80"
+                  >
+                    <Camera className="h-4 w-4" />
+                    Buka Kamera
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-700 py-2.5 text-sm font-medium text-gray-300 transition hover:border-twilight hover:text-white"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  {mode === "online" ? "Pilih Screenshot" : "Galeri"}
+                </button>
+              </div>
+            )}
+            {cameraError && (
+              <p className="mt-2 text-xs text-ember">{cameraError}</p>
+            )}
+          </div>
+
+          {errorMsg && (
+            <p className="rounded-lg bg-black/30 px-3 py-2 text-sm font-medium text-ember">
+              {errorMsg}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full rounded-lg bg-twilight py-3 font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {submitting ? "Mengirim..." : "Submit Absensi"}
+          </button>
+        </form>
+      </div>
+
+      {/* Overlay kamera */}
+      {cameraOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-black">
+          <div className="flex items-center justify-between px-4 py-3">
             <button
               type="button"
-              onClick={() => setMode("offline")}
-              className={`flex-1 rounded-lg border-2 px-4 py-2 font-medium transition ${
-                mode === "offline"
-                  ? "border-twilight bg-twilight text-white"
-                  : "border-gray-300 text-gray-700 hover:border-twilight/50"
-              }`}
+              onClick={closeCamera}
+              className="flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-white transition hover:bg-white/10"
             >
-              Offline
+              <X className="h-5 w-5" />
+              Tutup
             </button>
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+              Arahkan kamera lalu jepret
+            </p>
+          </div>
+          <div className="relative flex-1 overflow-hidden">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <div className="flex justify-center py-8">
             <button
               type="button"
-              onClick={() => setMode("online")}
-              className={`flex-1 rounded-lg border-2 px-4 py-2 font-medium transition ${
-                mode === "online"
-                  ? "border-twilight bg-twilight text-white"
-                  : "border-gray-300 text-gray-700 hover:border-twilight/50"
-              }`}
-            >
-              Online
-            </button>
+              onClick={capturePhoto}
+              aria-label="Ambil foto"
+              className="rounded-full border-4 border-white bg-inferno transition active:scale-95"
+              style={{ height: "4.5rem", width: "4.5rem" }}
+            />
           </div>
         </div>
-
-        {/* Upload foto */}
-        <div>
-          <label className="mb-1 block text-sm font-medium">
-            {mode === "online" ? "Screenshot Zoom" : "Foto di Depan Background"}
-          </label>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={handlePhotoChange}
-            className="w-full text-sm"
-          />
-          {photoPreview && (
-            <img
-              src={photoPreview}
-              alt="Preview"
-              className="mt-2 h-40 w-full rounded object-cover"
-            />
-          )}
-        </div>
-
-        {errorMsg && (
-          <p className="rounded-lg bg-inferno/10 px-3 py-2 text-sm font-medium text-inferno">
-            {errorMsg}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-lg bg-twilight py-3 font-semibold text-white transition hover:bg-inferno disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {submitting ? "Mengirim..." : "Submit Absensi"}
-        </button>
-      </form>
-      </div>
+      )}
     </div>
   );
 }
