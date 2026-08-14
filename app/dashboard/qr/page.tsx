@@ -1,10 +1,12 @@
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase-server";
 import { QrManager } from "./_components/qr-manager";
 
-export const dynamic = "force-dynamic";        
+export const dynamic = "force-dynamic";
 
 export default async function QrPage() {
     const supabase = await createClient();
+    const h = headers();
 
 const { data: sessions } = await supabase
     .from("qr_session")
@@ -23,7 +25,10 @@ const { data: sessions } = await supabase
 
         <QrManager
           sessions={sessions ?? []}
-          origin={process.env.NEXT_PUBLIC_SITE_URL ?? ""}
+          origin={
+            process.env.NEXT_PUBLIC_SITE_URL ??
+            `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`
+          }
         />
       </div>
     );
