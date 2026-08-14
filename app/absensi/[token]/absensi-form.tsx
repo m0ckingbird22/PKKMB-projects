@@ -50,7 +50,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
     setCameraError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: "environment" } },
+        video: { facingMode: { ideal: "user" } },
         audio: false,
       });
       streamRef.current = stream;
@@ -88,6 +88,10 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Kamera depan: preview di-mirror, jadi hasil jepretan ikut di-mirror
+    // supaya foto yang tersimpan sama dengan yang dilihat mahasiswa.
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0);
     canvas.toBlob(
       (blob) => {
@@ -350,7 +354,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
                 <button
                   type="button"
                   onClick={handleRetakePhoto}
-                  className="mt-2 text-sm font-medium text-inferno transition hover:text-ember"
+                  className="mt-2 text-sm font-medium text-white transition hover:text-ember"
                 >
                   Ulangi ambil foto
                 </button>
@@ -411,7 +415,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
               Tutup
             </button>
             <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
-              Arahkan kamera lalu jepret
+              Arahkan kamera ke muka
             </p>
           </div>
           <div className="relative flex-1 overflow-hidden">
@@ -420,7 +424,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
               autoPlay
               playsInline
               muted
-              className="h-full w-full object-cover"
+              className="h-full w-full scale-x-[-1] object-cover"
             />
           </div>
           <div className="flex justify-center py-8">
