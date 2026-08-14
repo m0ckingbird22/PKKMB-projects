@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient, getUserIdFromHeader } from "@/lib/supabase-server";
-import { Sidebar } from "@/components/dashboard/sidebar";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { AutoLogout } from "@/components/dashboard/auto-logout";
 
 export default async function DashboardLayout({
   children,
@@ -26,15 +27,12 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar
-        panitiaName={panitia!.nama}
-        panitiaRole={panitia!.role as "admin" | "panitia"}
-      />
-
-      <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-7xl p-8">{children}</div>
-      </main>
-    </div>
+    <DashboardShell
+      panitiaName={panitia!.nama}
+      panitiaRole={panitia!.role as "admin" | "panitia"}
+    >
+      <AutoLogout />
+      {children}
+    </DashboardShell>
   );
 }
