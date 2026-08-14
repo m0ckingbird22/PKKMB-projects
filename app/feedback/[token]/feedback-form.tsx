@@ -13,15 +13,51 @@ interface StudentResult {
   prodi_nama: string;
 }
 
-const KATEGORI_OPTIONS = [
-  "Materi",
-  "Pembicara",
-  "Panitia",
-  "Acara",
-  "Suasana",
+const LIKERT_QUESTIONS = [
+  {
+    id: "q1_materi",
+    text: "Materi yang disampaikan selama PKKMB relevan dan bermanfaat bagi saya sebagai mahasiswa baru.",
+  },
+  {
+    id: "q2_narasumber",
+    text: "Narasumber menyampaikan materi dengan jelas, menarik, dan mudah dipahami.",
+  },
+  {
+    id: "q3_panitia",
+    text: "Panitia memberikan pelayanan serta informasi yang jelas selama pelaksanaan PKKMB.",
+  },
+  {
+    id: "q4_jadwal",
+    text: "Jadwal dan alur kegiatan PKKMB berjalan dengan tertib dan sesuai waktu yang telah ditentukan.",
+  },
+  {
+    id: "q5_fasilitas",
+    text: "Fasilitas dan sarana yang disediakan selama PKKMB sudah memadai.",
+  },
+  {
+    id: "q6_puas",
+    text: "Secara keseluruhan, saya puas dengan pelaksanaan PKKMB tahun ini.",
+  },
 ] as const;
 
-type Kategori = (typeof KATEGORI_OPTIONS)[number];
+const LIKERT_OPTIONS = [
+  { value: 1, short: "STS", full: "Sangat Tidak Setuju" },
+  { value: 2, short: "TS", full: "Tidak Setuju" },
+  { value: 3, short: "N", full: "Netral" },
+  { value: 4, short: "S", full: "Setuju" },
+  { value: 5, short: "SS", full: "Sangat Setuju" },
+] as const;
+
+type RatingKey = (typeof LIKERT_QUESTIONS)[number]["id"];
+
+const INITIAL_RATINGS: Record<RatingKey, number> = {
+  q1_materi: 0,
+  q2_narasumber: 0,
+  q3_panitia: 0,
+  q4_jadwal: 0,
+  q5_fasilitas: 0,
+  q6_puas: 0,
+};
 
 export default function FeedbackForm({ day, token }: FeedbackFormProps) {
   // State pencarian nama
@@ -33,10 +69,10 @@ export default function FeedbackForm({ day, token }: FeedbackFormProps) {
   const [searching, setSearching] = useState(false);
 
   // State form
-  const [rating, setRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [kategori, setKategori] = useState<Kategori | "">("");
-  const [komentar, setKomentar] = useState("");
+  const [ratings, setRatings] =
+    useState<Record<RatingKey, number>>(INITIAL_RATINGS);
+  const [kelebihan, setKelebihan] = useState("");
+  const [saran, setSaran] = useState("");
 
   // State submit
   const [submitting, setSubmitting] = useState(false);
@@ -88,12 +124,12 @@ export default function FeedbackForm({ day, token }: FeedbackFormProps) {
       setErrorMsg("Pilih nama kamu dari daftar dulu.");
       return;
     }
-    if (!rating || rating < 1 || rating > 5) {
-      setErrorMsg("Pilih rating 1-5 bintang.");
-      return;
-    }
-    if (!kategori) {
-      setErrorMsg("Pilih kategori feedback.");
+
+    const unanswered = LIKERT_QUESTIONS.filter((q) => !ratings[q.id]);
+    if (unanswered.length > 0) {
+      setErrorMsg(
+        `Masih ada ${unanswered.length} pertanyaan yang belum dijawab.`,
+      );
       return;
     }
 
@@ -106,9 +142,9 @@ export default function FeedbackForm({ day, token }: FeedbackFormProps) {
         body: JSON.stringify({
           token,
           student_id: selectedStudent.id,
-          rating,
-          kategori,
-          komentar: komentar.trim() || undefined,
+          ...ratings,
+          kelebihan: kelebihan.trim() || undefined,
+          saran: saran.trim() || undefined,
         }),
       });
       const data = await res.json();
@@ -128,24 +164,26 @@ export default function FeedbackForm({ day, token }: FeedbackFormProps) {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-ember/20 to-white px-4">
+      <div className="flex min-h-screen items-center justify-center bg-black bg-[radial-gradient(circle_at_top_right,#801831_0%,#2E0712_25%,transparent_60%),radial-gradient(circle_at_bottom_left,#801831_0%,#2E0712_25%,transparent_60%)] px-4">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-twilight">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-inferno">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-8 w-8 text-ember"
+              className="h-8 w-8 text-white"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
               strokeWidth={3}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-twilight">
-            Feedback Terkirim!
-          </h1>
-          <p className="mt-2 text-gray-700">
+          <h1 className="text-2xl font-bold text-white">Feedback Terkirim!</h1>
+          <p className="mt-2 text-gray-400">
             Terima kasih, {selectedStudent?.nama}!
           </p>
         </div>
@@ -154,36 +192,40 @@ export default function FeedbackForm({ day, token }: FeedbackFormProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-ember/20 to-white px-4 py-8">
+    <div className="min-h-screen bg-black bg-[radial-gradient(circle_at_top_right,#801831_0%,#2E0712_25%,transparent_60%),radial-gradient(circle_at_bottom_left,#801831_0%,#2E0712_25%,transparent_60%)] px-4 py-8">
       <div className="mx-auto max-w-md">
         <div className="mb-6">
-          <span className="inline-block rounded-full bg-ember px-3 py-1 text-xs font-bold uppercase tracking-wide text-twilight">
+          <span className="inline-block rounded-full bg-twilight px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
             Hari {day}
           </span>
-          <h1 className="mt-3 text-2xl font-bold text-twilight">
-            Feedback PKKMB
+          <h1 className="mt-3 text-2xl font-bold text-ember">
+            Feedback PKKMB SPARK
           </h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Berikan rating & masukan untuk hari ini.
+          <p className="mt-1 text-sm text-ember/70">
+            Berikan penilaian & masukan untuk PKKMB Spark.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Search nama */}
           <div>
-            <label className="mb-1 block text-sm font-medium">Nama Kamu</label>
+            <label className="mb-1 block text-sm font-medium text-ember/80">
+              Nama Kamu
+            </label>
             {selectedStudent ? (
-              <div className="flex items-center justify-between rounded-lg border-2 border-twilight bg-ember/20 px-3 py-2">
+              <div className="flex items-center justify-between rounded-lg border-2 border-inferno bg-inferno/10 px-3 py-2">
                 <div>
-                  <p className="font-semibold text-twilight">{selectedStudent.nama}</p>
-                  <p className="text-sm text-gray-700">
+                  <p className="font-semibold text-white">
+                    {selectedStudent.nama}
+                  </p>
+                  <p className="text-sm text-gray-400">
                     {selectedStudent.prodi_nama}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={handleChangeStudent}
-                  className="rounded px-2 py-1 text-sm font-medium text-twilight transition hover:bg-twilight hover:text-white"
+                  className="rounded px-2 py-1 text-sm font-medium text-inferno transition hover:bg-inferno hover:text-white"
                 >
                   Ganti
                 </button>
@@ -195,21 +237,21 @@ export default function FeedbackForm({ day, token }: FeedbackFormProps) {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Ketik nama kamu..."
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none transition focus:border-twilight focus:ring-2 focus:ring-twilight/20"
+                  className="w-full rounded-lg border border-gray-700 bg-[#1d1c1c] px-3 py-2 text-white placeholder-gray-500 outline-none transition"
                   autoComplete="off"
                 />
                 {searching && (
-                  <p className="mt-1 text-xs text-gray-400">Mencari...</p>
+                  <p className="mt-1 text-xs text-ember">Mencari...</p>
                 )}
                 {results.length > 0 && (
-                  <ul className="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg">
+                  <ul className="absolute z-10 mt-1 w-full rounded-lg border border-gray-700 bg-[#1d1c1c] shadow-xl">
                     {results.map((s) => (
                       <li
                         key={s.id}
                         onClick={() => handleSelectStudent(s)}
-                        className="cursor-pointer px-3 py-2 transition hover:bg-ember/30"
+                        className="cursor-pointer px-3 py-2 transition hover:bg-inferno/20"
                       >
-                        <p className="font-medium">{s.nama}</p>
+                        <p className="font-medium text-white">{s.nama}</p>
                         <p className="text-sm text-gray-500">{s.prodi_nama}</p>
                       </li>
                     ))}
@@ -219,75 +261,96 @@ export default function FeedbackForm({ day, token }: FeedbackFormProps) {
             )}
           </div>
 
-          {/* Rating bintang */}
-          <div>
-            <label className="mb-1 block text-sm font-medium">Rating</label>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((star) => {
-                const active = (hoverRating || rating) >= star;
-                return (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star)}
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    className="text-3xl transition transform hover:scale-110"
-                    aria-label={`Rating ${star} bintang`}
-                  >
-                    <span className={active ? "text-ember" : "text-gray-300"}>
-                      ★
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            {rating > 0 && (
-              <p className="mt-1 text-xs text-gray-500">{rating}/5</p>
-            )}
-          </div>
-
-          {/* Kategori */}
-          <div>
-            <label className="mb-1 block text-sm font-medium">Kategori</label>
-            <div className="flex flex-wrap gap-2">
-              {KATEGORI_OPTIONS.map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => setKategori(k)}
-                  className={`rounded-full border-2 px-3 py-1 text-sm font-medium transition ${
-                    kategori === k
-                      ? "border-twilight bg-twilight text-white"
-                      : "border-gray-300 text-gray-700 hover:border-twilight/50"
-                  }`}
-                >
-                  {k}
-                </button>
+          {/* Legenda skala Likert */}
+          <div className="rounded-lg border border-inferno/20 bg-inferno/5 p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-twilight">
+              Skala Penilaian
+            </p>
+            <div className="mt-2 grid grid-cols-5 gap-1 text-center">
+              {LIKERT_OPTIONS.map((o) => (
+                <div key={o.value}>
+                  <div className="text-sm font-bold text-twilight">
+                    {o.value}
+                  </div>
+                  <div className="text-[10px] text-twilight">{o.full}</div>
+                </div>
               ))}
             </div>
           </div>
 
-          {/* Komentar */}
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Komentar <span className="text-gray-400">(opsional)</span>
-            </label>
-            <textarea
-              value={komentar}
-              onChange={(e) => setKomentar(e.target.value)}
-              placeholder="Tulis masukan atau saran kamu..."
-              rows={3}
-              maxLength={500}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none transition focus:border-twilight focus:ring-2 focus:ring-twilight/20"
-            />
-            <p className="mt-1 text-right text-xs text-gray-400">
-              {komentar.length}/500
-            </p>
+          {/* Pertanyaan Likert */}
+          <div className="space-y-4">
+            {LIKERT_QUESTIONS.map((q, idx) => (
+              <div key={q.id}>
+                <p className="mb-2 text-sm font-medium text-white">
+                  <span className="font-bold text-white">{idx + 1}.</span>{" "}
+                  {q.text}
+                </p>
+                <div className="grid grid-cols-5 gap-1">
+                  {LIKERT_OPTIONS.map((opt) => {
+                    const active = ratings[q.id] === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() =>
+                          setRatings((prev) => ({ ...prev, [q.id]: opt.value }))
+                        }
+                        title={opt.full}
+                        aria-pressed={active}
+                        className={`flex items-center justify-center rounded-md border-2 py-2 transition ${
+                          active
+                            ? "border-inferno bg-inferno/30 text-white"
+                            : "border-gray-700 text-gray-300 hover:border-twilight hover:bg-twilight/30"
+                        }`}
+                      >
+                        <span className="text-sm font-bold">{opt.value}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pertanyaan terbuka */}
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-white">
+                Kelebihan / hal yang paling berkesan
+              </label>
+              <textarea
+                value={kelebihan}
+                onChange={(e) => setKelebihan(e.target.value)}
+                placeholder="Menurut Anda, apa kelebihan atau hal yang paling berkesan dari pelaksanaan PKKMB tahun ini?"
+                rows={3}
+                maxLength={500}
+                className="w-full rounded-lg border border-gray-700 bg-[#1d1c1c] px-3 py-2 text-white placeholder-gray-500 outline-none transition focus:border-inferno focus:ring-2 focus:ring-inferno/20"
+              />
+              <p className="mt-1 text-right text-xs text-gray-500">
+                {kelebihan.length}/500
+              </p>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-white">
+                Saran / masukan
+              </label>
+              <textarea
+                value={saran}
+                onChange={(e) => setSaran(e.target.value)}
+                placeholder="Apa saran atau masukan yang ingin Anda berikan agar pelaksanaan PKKMB berikutnya menjadi lebih baik?"
+                rows={3}
+                maxLength={500}
+                className="w-full rounded-lg border border-gray-700 bg-[#1d1c1c] px-3 py-2 text-white placeholder-gray-500 outline-none transition focus:border-inferno focus:ring-2 focus:ring-inferno/20"
+              />
+              <p className="mt-1 text-right text-xs text-gray-500">
+                {saran.length}/500
+              </p>
+            </div>
           </div>
 
           {errorMsg && (
-            <p className="rounded-lg bg-inferno/10 px-3 py-2 text-sm font-medium text-inferno">
+            <p className="rounded-lg bg-black/30 px-3 py-2 text-sm font-medium text-ember">
               {errorMsg}
             </p>
           )}
@@ -295,7 +358,7 @@ export default function FeedbackForm({ day, token }: FeedbackFormProps) {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-twilight py-3 font-semibold text-white transition hover:bg-inferno disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-lg bg-twilight py-3 font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? "Mengirim..." : "Submit Feedback"}
           </button>

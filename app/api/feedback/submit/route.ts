@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-admin";
 
-const KATEGORI_VALID = [
-  "Materi",
-  "Pembicara",
-  "Panitia",
-  "Acara",
-  "Suasana",
-];
+const RATING_KEYS = [
+  "q1_materi",
+  "q2_narasumber",
+  "q3_panitia",
+  "q4_jadwal",
+  "q5_fasilitas",
+  "q6_puas",
+] as const;
 
 export async function POST(req: NextRequest) {
   const supabase = createAdminClient();
@@ -15,19 +16,28 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const token = body.token as string;
   const studentId = body.student_id as string;
-  const rating = Number(body.rating);
-  const kategori = body.kategori as string;
-  const komentar = (body.komentar as string | undefined)?.trim() || null;
+  const kelebihan = (body.kelebihan as string | undefined)?.trim() || null;
+  const saran = (body.saran as string | undefined)?.trim() || null;
 
-  // ── Validasi input
-  if (!token || !studentId || !rating || !kategori) {
-    return NextResponse.json({ error: "Field tidak lengkap" }, { status: 400 });
+  // ── Validasi input dasar
+  if (!token || !studentId) {
+    return NextResponse.json(
+      { error: "Field tidak lengkap" },
+      { status: 400 },
+    );
   }
-  if (rating < 1 || rating > 5) {
-    return NextResponse.json({ error: "Rating tidak valid" }, { status: 400 });
-  }
-  if (!KATEGORI_VALID.includes(kategori)) {
-    return NextResponse.json({ error: "Kategori tidak valid" }, { status: 400 });
+
+  // ── Validasi 6 rating Likert (wajib 1-5)
+  const ratings: Record<string, number> = {};
+  for (const key of RATING_KEYS) {
+    const value = Number(body[key]);
+    if (!Number.isInteger(value) || value < 1 || value > 5) {
+      return NextResponse.json(
+        { error: `Rating untuk ${key} tidak valid (harus 1-5)` },
+        { status: 400 },
+      );
+    }
+    ratings[key] = value;
   }
 
   // ── Validasi token aktif & bertipe feedback
@@ -41,7 +51,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Token tidak valid" }, { status: 404 });
   }
   if (!session.is_active) {
-    return NextResponse.json({ error: "Sesi sudah berakhir" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Sesi sudah berakhir" },
+      { status: 403 },
+    );
   }
   if (session.type !== "feedback") {
     return NextResponse.json(
@@ -67,9 +80,9 @@ export async function POST(req: NextRequest) {
   const { error: insertError } = await supabase.from("feedback").insert({
     mahasiswa_id: studentId,
     day: session.day,
-    rating,
-    kategori,
-    komentar,
+    ...ratings,
+    kelebihan,
+    saran,
     sumbitted_at: new Date().toISOString(),
   });
 
