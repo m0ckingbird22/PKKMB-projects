@@ -29,6 +29,13 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Root URL: sudah login -> dashboard, belum -> login
+  if (request.nextUrl.pathname === "/") {
+    return NextResponse.redirect(
+      new URL(user ? "/dashboard" : "/login", request.url),
+    );
+  }
+
   if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
@@ -54,5 +61,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login"],
+  matcher: ["/", "/dashboard/:path*", "/login"],
 };
