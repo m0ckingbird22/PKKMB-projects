@@ -24,7 +24,7 @@ export default async function StudentsPage({
   // ── Query mahasiswa dengan filter
   let query = supabase
     .from("mahasiswa")
-    .select("id, nama, email, prodi:prodi_id(nama, fakultas)", {
+    .select("id, nama, email, prodi:prodi_id(nama)", {
       count: "exact",
     });
 
@@ -49,23 +49,23 @@ export default async function StudentsPage({
   // ── Fetch semua prodi untuk dropdown filter
   const { data: prodiList } = await supabase
     .from("prodi")
-    .select("id, nama, fakultas")
-    .order("fakultas", { ascending: true });
+    .select("id, nama")
+    .order("nama", { ascending: true });
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Data Mahasiswa</h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <h1 className="text-2xl font-bold text-white">Data Mahasiswa</h1>
+        <p className="text-gray-400 text-sm mt-1">
           Daftar mahasiswa peserta PKKMB Universitas Cakrawala
         </p>
       </div>
 
       {/* Card */}
-      <div className="bg-white rounded-xl border border-gray-200">
+      <div className="bg-[#1d1c1c] rounded-xl border border-gray-800">
         {/* Filter */}
-        <div className="px-6 py-4 border-b border-gray-100">
+        <div className="px-6 py-4 border-b border-gray-800">
           <StudentsFilter prodiList={prodiList ?? []} totalCount={count ?? 0} />
         </div>
 

@@ -12,7 +12,7 @@ export function ProdiCardGrid({
   onSelectProdi,
 }: ProdiCardGridProps) {
   if (prodiList.length === 0) {
-    return <p className="text-sm text-gray-500">Tidak ada data prodi.</p>;
+    return <p className="text-sm text-gray-400">Tidak ada data prodi.</p>;
   }
 
   return (
@@ -21,7 +21,7 @@ export function ProdiCardGrid({
         <button
           type="button"
           onClick={() => onSelectProdi(null)}
-          className="mb-3 text-sm font-medium text-indigo-600 hover:text-indigo-800"
+          className="mb-3 text-sm font-medium text-ember hover:text-inferno"
         >
           ← Tampilkan semua prodi
         </button>
@@ -31,11 +31,11 @@ export function ProdiCardGrid({
         {prodiList.map((prodi) => {
           const isActive = activeProdi === prodi.nama;
           const cardClass = isActive
-            ? "border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500"
-            : "border-gray-200 bg-white hover:border-indigo-300hover:bg-indigo-50/50";
+            ? "border-twilight bg-twilight/10 ring-1 ring-twilight"
+            : "border-gray-800 bg-[#1d1c1c] hover:border-twilight/50 hover:bg-gray-800/50";
           const badgeClass = isActive
-            ? "bg-indigo-600 text-white"
-            : "bg-indigo-50 text-indigo-700";
+            ? "bg-twilight text-white"
+            : "bg-ember/15 text-ember";
 
           return (
             <button
@@ -45,17 +45,14 @@ export function ProdiCardGrid({
               className={`text-left rounded-lg border p-4 transition-colors ${cardClass}`}
             >
               <span className="flex items-start justify-between gap-2">
-                <span className="font-semibold text-gray-900 text-sm leading-tight">
+                <span className="font-semibold text-white text-sm leading-tight">
                   {prodi.nama}
                 </span>
                 <span
-                  className={`shrink-0 rounded-full px-2 py-0.5 text-xsfont-medium ${badgeClass}`}
+                  className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${badgeClass}`}
                 >
                   {prodi.jumlah}
                 </span>
-              </span>
-              <span className="mt-1 block text-xs text-gray-500">
-                {prodi.fakultas}
               </span>
             </button>
           );

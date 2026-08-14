@@ -4,7 +4,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-type ProdiData = { nama: string; fakultas: string };
+type ProdiData = { nama: string };
 
 interface Student {
   id: string;
@@ -48,8 +48,10 @@ export function StudentsTable({
 
   if (students.length === 0) {
     return (
-      <div className="text-center py-16 text-gray-500">
-        <p className="text-lg font-medium">Tidak ada mahasiswa ditemukan</p>
+      <div className="text-center py-16 text-gray-400">
+        <p className="text-lg font-medium text-white">
+          Tidak ada mahasiswa ditemukan
+        </p>
         <p className="text-sm mt-1">
           Coba ubah filter atau kata kunci pencarian
         </p>
@@ -62,46 +64,40 @@ export function StudentsTable({
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+            <tr className="border-b border-gray-800">
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider w-8">
                 No
               </th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Nama
               </th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Email
               </th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Program Studi
-              </th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Fakultas
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-800">
             {students.map((student, index) => {
               const prodi = getProdi(student.prodi);
               return (
                 <tr
                   key={student.id}
-                  className="hover:bg-gray-50 transition-colors"
+                  className="hover:bg-gray-800/50 transition-colors"
                 >
-                  <td className="px-4 py-3 text-gray-400 text-xs">
+                  <td className="px-4 py-3 text-gray-500 text-xs">
                     {(page - 1) * pageSize + index + 1}
                   </td>
-                  <td className="px-4 py-3 font-medium text-gray-900">
+                  <td className="px-4 py-3 font-medium text-white">
                     {student.nama}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 text-sm">
+                  <td className="px-4 py-3 text-gray-300 text-sm">
                     {student.email ?? "-"}
                   </td>
-                  <td className="px-4 py-3 text-indigo-600 font-medium">
+                  <td className="px-4 py-3 text-ember font-medium">
                     {prodi?.nama ?? "-"}
-                  </td>
-                  <td className="px-4 py-3 text-gray-500">
-                    {prodi?.fakultas ?? "-"}
                   </td>
                 </tr>
               );
@@ -111,21 +107,21 @@ export function StudentsTable({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 mt-2">
-          <p className="text-xs text-gray-500">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-800 mt-2">
+          <p className="text-xs text-gray-400">
             Menampilkan{" "}
-            <span className="font-medium text-gray-700">
+            <span className="font-medium text-gray-200">
               {(page - 1) * pageSize + 1}–
               {Math.min(page * pageSize, totalCount)}
             </span>{" "}
-            dari <span className="font-medium text-gray-700">{totalCount}</span>{" "}
+            dari <span className="font-medium text-gray-200">{totalCount}</span>{" "}
             mahasiswa
           </p>
           <div className="flex items-center gap-1">
             <button
               onClick={() => goToPage(page - 1)}
               disabled={page <= 1}
-              className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -142,7 +138,7 @@ export function StudentsTable({
                 p === "..." ? (
                   <span
                     key={`ellipsis-${i}`}
-                    className="px-2 text-gray-400 text-xs"
+                    className="px-2 text-gray-500 text-xs"
                   >
                     ...
                   </span>
@@ -150,7 +146,11 @@ export function StudentsTable({
                   <button
                     key={p}
                     onClick={() => goToPage(p as number)}
-                    className={`w-8 h-8 text-xs rounded-lg transition-colors ${p === page ? "bg-indigo-600 text-white font-medium" : "text-gray-600 hover:bg-gray-100"}`}
+                    className={`w-8 h-8 text-xs rounded-lg transition-colors ${
+                      p === page
+                        ? "bg-twilight text-white font-medium"
+                        : "text-gray-300 hover:bg-gray-800"
+                    }`}
                   >
                     {p}
                   </button>
@@ -159,7 +159,7 @@ export function StudentsTable({
             <button
               onClick={() => goToPage(page + 1)}
               disabled={page >= totalPages}
-              className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

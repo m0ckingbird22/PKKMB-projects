@@ -82,28 +82,43 @@ export type Database = {
         Row: {
           day: number
           id: string
-          kategori: string
-          komentar: string | null
           mahasiswa_id: string
-          rating: number
+          q1_materi: number | null
+          q2_narasumber: number | null
+          q3_panitia: number | null
+          q4_jadwal: number | null
+          q5_fasilitas: number | null
+          q6_puas: number | null
+          kelebihan: string | null
+          saran: string | null
           sumbitted_at: string | null
         }
         Insert: {
           day: number
           id?: string
-          kategori: string
-          komentar?: string | null
           mahasiswa_id: string
-          rating: number
+          q1_materi?: number | null
+          q2_narasumber?: number | null
+          q3_panitia?: number | null
+          q4_jadwal?: number | null
+          q5_fasilitas?: number | null
+          q6_puas?: number | null
+          kelebihan?: string | null
+          saran?: string | null
           sumbitted_at?: string | null
         }
         Update: {
           day?: number
           id?: string
-          kategori?: string
-          komentar?: string | null
           mahasiswa_id?: string
-          rating?: number
+          q1_materi?: number | null
+          q2_narasumber?: number | null
+          q3_panitia?: number | null
+          q4_jadwal?: number | null
+          q5_fasilitas?: number | null
+          q6_puas?: number | null
+          kelebihan?: string | null
+          saran?: string | null
           sumbitted_at?: string | null
         }
         Relationships: [
@@ -181,21 +196,18 @@ export type Database = {
       prodi: {
         Row: {
           created_at: string | null
-          fakultas: string | null
           id: string
           kode: string
           nama: string
         }
         Insert: {
           created_at?: string | null
-          fakultas?: string | null
           id?: string
           kode: string
           nama: string
         }
         Update: {
           created_at?: string | null
-          fakultas?: string | null
           id?: string
           kode?: string
           nama?: string
