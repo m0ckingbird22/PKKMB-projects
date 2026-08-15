@@ -153,6 +153,18 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Cek yang sama dengan server: wajib gambar, maks 5 MB
+    if (!file.type.startsWith("image/")) {
+      setErrorMsg("File harus berupa foto (JPG/PNG/WEBP).");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg("Foto terlalu besar. Maksimal 5 MB.");
+      e.target.value = "";
+      return;
+    }
+    setErrorMsg(null);
     setPhoto(file);
     setPhotoPreview(URL.createObjectURL(file));
   }

@@ -18,6 +18,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Mode tidak valid" }, { status: 400 });
   }
 
+  // ── Validasi foto: wajib gambar, maks 5 MB
+  // (5 MB cukup untuk selfie kamera HP; Vercel sendiri tolak body > ±4.5 MB)
+  const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
+  if (!(photo instanceof File) || !photo.type.startsWith("image/")) {
+    return NextResponse.json(
+      { error: "File harus berupa foto (JPG/PNG/WEBP)" },
+      { status: 400 },
+    );
+  }
+  if (photo.size > MAX_PHOTO_SIZE) {
+    return NextResponse.json(
+      { error: "Foto terlalu besar. Maksimal 5 MB." },
+      { status: 413 },
+    );
+  }
+
   // ── Validasi token aktif
   const { data: session, error: sessionError } = await supabase
     .from("qr_session")
@@ -46,7 +62,8 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Upload foto ke Storage
-  const ext = photo.name.split(".").pop() || "jpg";
+  // Ext dari MIME type (bukan nama file), biar gak bisa dipakai naruh ext aneh
+  const ext = photo.type === "image/jpeg" ? "jpg" : photo.type.split("/")[1] || "jpg";
   const fileName = `${session.day}/${studentId}-${Date.now()}.${ext}`;
   const { error: uploadError } = await supabase.storage
     .from("pkkmb-photos")
