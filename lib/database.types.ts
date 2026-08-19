@@ -257,6 +257,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      search_mahasiswa: {
+        Args: { q: string; day: number; for_type?: string }
+        Returns: { id: string; nama: string; prodi_nama: string }[]
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
