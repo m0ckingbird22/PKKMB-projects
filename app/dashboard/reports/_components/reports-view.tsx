@@ -105,7 +105,7 @@ export function ReportsView({
         selectedProdi === ""
           ? "Semua Prodi"
           : prodiList.find((p) => p.id === selectedProdi)?.nama ?? "Semua Prodi";
-      generateReportPDF({
+      await generateReportPDF({
         day,
         prodiNama: prodiFilterNama,
         rosterStudents,

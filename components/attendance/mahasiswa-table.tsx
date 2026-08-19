@@ -90,6 +90,8 @@ export function MahasiswaTable({ records }: MahasiswaTableProps) {
                       <img
                         src={r.fotoUrl}
                         alt={`Foto ${r.nama}`}
+                        loading="lazy"
+                        decoding="async"
                         className="h-10 w-10 rounded-full object-cover"
                       />
                     </a>

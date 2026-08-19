@@ -39,20 +39,27 @@ export function AttendanceView({
     router.push(`${pathname}?${params.toString()}`);
   }
 
-  // ── Realtime: refresh data saat ada insert baru
+  // ── Realtime: refresh data saat ada insert baru.
+  // Di-throttle maks 1x / 15 detik biar gak render storm saat ramai.
   useEffect(() => {
     const supabase = createClient();
+    let lastRefresh = 0;
+    const maybeRefresh = () => {
+      if (Date.now() - lastRefresh < 15_000) return;
+      lastRefresh = Date.now();
+      router.refresh();
+    };
     const channel = supabase
       .channel("attendance-changes")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "attendance" },
-        () => router.refresh(),
+        maybeRefresh,
       )
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "attendance" },
-        () => router.refresh(),
+        maybeRefresh,
       )
       .subscribe();
 

@@ -93,25 +93,33 @@ export function DashboardView({
     router.push(`${pathname}?${params.toString()}`);
   }
 
-  // Realtime refresh saat ada perubahan attendance/feedback/session
+  // Realtime refresh saat ada perubahan attendance/feedback/session.
+  // Di-throttle maks 1x / 15 detik: saat event ramai insert datang deras,
+  // refresh di tiap event bikin render storm (server render ulang semua data).
   useEffect(() => {
     const supabase = createClient();
+    let lastRefresh = 0;
+    const maybeRefresh = () => {
+      if (Date.now() - lastRefresh < 15_000) return;
+      lastRefresh = Date.now();
+      router.refresh();
+    };
     const channel = supabase
       .channel("dashboard-changes")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "attendance" },
-        () => router.refresh(),
+        maybeRefresh,
       )
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "feedback" },
-        () => router.refresh(),
+        maybeRefresh,
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "qr_session" },
-        () => router.refresh(),
+        maybeRefresh,
       )
       .subscribe();
 

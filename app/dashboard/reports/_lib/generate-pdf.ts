@@ -1,6 +1,5 @@
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
-
+// jsPDF di-import dinamis di dalam fungsi (±300 KB) supaya gak ikut
+// bundle awal halaman reports — baru diunduh saat user klik Export PDF.
 interface RosterStudent {
   id: string;
   nama: string;
@@ -17,7 +16,11 @@ const HEADER_FILL: [number, number, number] = [243, 228, 231];
 const MARK_FILL: [number, number, number] = [226, 226, 226];
 const GRAY_TEXT: [number, number, number] = [90, 90, 90];
 
-export function generateReportPDF(data: ReportData) {
+export async function generateReportPDF(data: ReportData) {
+  const [{ jsPDF }, { default: autoTable }] = await Promise.all([
+    import("jspdf"),
+    import("jspdf-autotable"),
+  ]);
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
 
