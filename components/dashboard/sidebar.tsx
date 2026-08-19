@@ -15,8 +15,6 @@ import {
   LogOut,
   X,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase-client";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 const NAV_ITEMS = [
@@ -42,14 +40,12 @@ export function Sidebar({
   onCloseMobile,
 }: SidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const supabase = createClient();
   const [collapsed, setCollapsed] = useState(false);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.refresh();
-    router.push("/login");
+  // Logout diproses server-side di /auth/signout supaya semua
+  // cookie sb-* pasti terhapus (signOut() browser tidak selalu cukup)
+  const handleLogout = () => {
+    window.location.href = "/auth/signout";
   };
 
   const inner = (isMobile: boolean) => (

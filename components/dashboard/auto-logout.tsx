@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase-client";
 
 // Ubah angka ini kalau mau durasi idle yang beda
 const IDLE_LIMIT_MS = 5 * 60 * 1000; // 5 menit tanpa aktivitas
@@ -18,7 +16,6 @@ const ACTIVITY_EVENTS = [
 ] as const;
 
 export function AutoLogout() {
-  const router = useRouter();
   const lastActivityRef = useRef<number>(Date.now());
 
   useEffect(() => {
@@ -34,10 +31,8 @@ export function AutoLogout() {
       if (Date.now() - lastActivityRef.current < IDLE_LIMIT_MS) return;
 
       clearInterval(interval);
-      const supabase = createClient();
-      // signOut menghapus cookies auth Supabase di browser ini
-      await supabase.auth.signOut();
-      router.replace("/login");
+      // Logout via server supaya semua cookie sb-* pasti terhapus
+      window.location.replace("/auth/signout");
     }, CHECK_INTERVAL_MS);
 
     return () => {
@@ -46,7 +41,7 @@ export function AutoLogout() {
       );
       clearInterval(interval);
     };
-  }, [router]);
+  }, []);
 
   return null;
 }
