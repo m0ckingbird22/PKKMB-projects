@@ -131,7 +131,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
       setSearching(true);
       try {
         const res = await fetch(
-          `/api/students/search?q=${encodeURIComponent(query)}&day=${day}`,
+          `/api/students/search?q=${encodeURIComponent(query)}&token=${encodeURIComponent(token)}`,
         );
         const data = await res.json();
         setResults(data.students || []);

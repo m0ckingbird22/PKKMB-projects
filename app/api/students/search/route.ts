@@ -2,29 +2,47 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-admin";
 
 export async function GET(request: NextRequest) {
-  const q = request.nextUrl.searchParams.get("q")?.trim().toLocaleLowerCase();
-  const dayParam = request.nextUrl.searchParams.get("day");
-  const day = dayParam ? Number(dayParam) : null;
-  const forType = request.nextUrl.searchParams.get("for") ?? "absensi";
+  const params = request.nextUrl.searchParams;
+  const q = params.get("q")?.trim().toLocaleLowerCase();
+  const token = params.get("token");
+  const forType = params.get("for") ?? "absensi";
 
   if (!q || q.length < 2) {
-    return NextResponse.json({ students: [] });
-  }
-  if (day === null || Number.isNaN(day)) {
     return NextResponse.json({ students: [] });
   }
   if (!["absensi", "feedback"].includes(forType)) {
     return NextResponse.json({ students: [] });
   }
+  if (!token) {
+    return NextResponse.json({ error: "Token diperlukan" }, { status: 401 });
+  }
 
-  // 1 panggilan RPC: pencarian + filter "sudah absen/sudah feedback"
-  // dikerjakan database (anti-join NOT EXISTS ber-index) — 1 round-trip,
-  // tanpa kirim daftar UUID seperti versi NOT IN dulu.
-  // Definisi function: supabase/search_mahasiswa_rpc.sql
   const supabase = createAdminClient();
+
+  // Gerbang keamanan: hanya pemegang token QR aktif yang boleh mencari.
+  // Tanpa ini, siapa pun bisa enumerasi data seluruh mahasiswa.
+  const { data: session, error: sessionError } = await supabase
+    .from("qr_session")
+    .select("day, is_active, type")
+    .eq("token", token)
+    .single();
+
+  if (sessionError || !session) {
+    return NextResponse.json({ error: "Token tidak valid" }, { status: 404 });
+  }
+  if (!session.is_active) {
+    return NextResponse.json({ error: "Sesi sudah berakhir" }, { status: 403 });
+  }
+  if (session.type !== forType) {
+    return NextResponse.json({ error: "Token tidak cocok" }, { status: 400 });
+  }
+
+  // day diambil dari sesi di server, bukan dari query client
+  // (dipakai RPC untuk filter "sudah absen/sudah feedback")
+  // 1 panggilan RPC: definisi function di supabase/search_mahasiswa_rpc.sql
   const { data, error } = await supabase.rpc("search_mahasiswa", {
     q,
-    day,
+    day: session.day,
     for_type: forType,
   });
 

@@ -91,7 +91,7 @@ export default function FeedbackForm({ day, token }: FeedbackFormProps) {
       setSearching(true);
       try {
         const res = await fetch(
-          `/api/students/search?q=${encodeURIComponent(query)}&day=${day}&for=feedback`,
+          `/api/students/search?q=${encodeURIComponent(query)}&for=feedback&token=${encodeURIComponent(token)}`,
         );
         const data = await res.json();
         setResults(data.students || []);
@@ -103,7 +103,7 @@ export default function FeedbackForm({ day, token }: FeedbackFormProps) {
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [query, selectedStudent, day]);
+  }, [query, selectedStudent]);
 
   function handleSelectStudent(student: StudentResult) {
     setSelectedStudent(student);
