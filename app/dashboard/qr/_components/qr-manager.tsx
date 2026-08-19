@@ -175,7 +175,9 @@ export function QrManager({ sessions: initial, origin }: Props) {
                   </p>
                   <p className="text-xs text-gray-400">
                     Day {s.day} •{" "}
-                    {new Date(s.created_at ?? "").toLocaleString("id-ID")}
+                    {new Date(s.created_at ?? "").toLocaleString("id-ID", {
+                      timeZone: "Asia/Jakarta",
+                    })}
                   </p>
                 </div>
                 <button

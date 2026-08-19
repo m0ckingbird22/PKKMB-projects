@@ -89,6 +89,7 @@ const urlDay = searchParams.day ?
       ? new Date(r.submitted_at).toLocaleTimeString("id-ID", {
           hour: "2-digit",
           minute: "2-digit",
+          timeZone: "Asia/Jakarta",
         })
       : "-",
     status: r.is_flagged ? ("flagged" as const) : ("hadir" as const),

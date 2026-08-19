@@ -18,9 +18,16 @@
     }
 
     // Generate token: PKKMB-D{day}-{HHMM} untuk absensi, PKKMB-F{day}-{HHMM} untuk feedback
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2, "0");
-    const mm = String(now.getMinutes()).padStart(2, "0");
+    // HHMM wajib zona Asia/Jakarta — server Vercel berjalan di UTC,
+    // getHours() akan menghasilkan jam UTC (19:33 WIB terbaca 12:33)
+    const [hh, mm] = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Jakarta",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })
+      .format(new Date())
+      .split(":");
     const prefix = type === "feedback" ? "PKKMB-F" : "PKKMB-D";
     const token = `${prefix}${day}-${hh}${mm}`;
 
