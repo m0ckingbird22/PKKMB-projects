@@ -82,9 +82,15 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
     const video = videoRef.current;
     if (!video || !video.videoWidth) return;
 
+    const MAX_DIM = 1080;
+    const scale = Math.min(
+      1,
+      MAX_DIM / Math.max(video.videoWidth, video.videoHeight),
+    );
+
     const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = Math.round(video.videoWidth * scale);
+    canvas.height = Math.round(video.videoHeight * scale);
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -104,7 +110,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
         closeCamera();
       },
       "image/jpeg",
-      0.9,
+      0.7,
     );
   }
 
@@ -296,7 +302,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
                   <p className="mt-1 text-xs text-ember">Mencari...</p>
                 )}
                 {results.length > 0 && (
-                  <ul className="absolute z-10 mt-1 w-full rounded-lg border border-gray-700 bg-[#1d1c1c] shadow-xl">
+                  <ul className="absolute z-10 mt-1 max-h-[300px] w-full overflow-y-auto rounded-lg border border-gray-700 bg-[#1d1c1c] shadow-xl">
                     {results.map((s) => (
                       <li
                         key={s.id}

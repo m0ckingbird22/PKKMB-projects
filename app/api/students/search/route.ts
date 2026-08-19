@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     .from("mahasiswa")
     .select("id,nama,prodi:prodi_id(nama)")
     .ilike("nama_normalized", `%${q}%`)
-    .limit(10);
+    .limit(30);
 
   if (excludeIds.length > 0) {
     query = query.not("id", "in", `(${excludeIds.join(",")})`);
