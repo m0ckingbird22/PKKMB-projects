@@ -253,13 +253,13 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
     <div className="min-h-screen bg-black bg-[radial-gradient(circle_at_top_right,#801831_0%,#2E0712_25%,transparent_60%),radial-gradient(circle_at_bottom_left,#801831_0%,#2E0712_25%,transparent_60%)] px-4 py-8">
       <div className="mx-auto max-w-md">
         <div className="mb-6">
-          <span className="inline-block rounded-full bg-twilight px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+          <span className="inline-block rounded-full bg-inferno px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
             Hari {day}
           </span>
           <h1 className="mt-3 text-2xl font-bold text-ember">
             Absensi PKKMB SPARK
           </h1>
-          <p className="mt-1 text-sm text-ember/70">
+          <p className="mt-1 text-sm text-white">
             Isi form berikut untuk mencatat kehadiran.
           </p>
         </div>
@@ -267,7 +267,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Search nama */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-ember/80">
+            <label className="mb-1 block text-sm font-medium text-white">
               Nama Kamu
             </label>
             {selectedStudent ? (
@@ -321,7 +321,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
 
           {/* Mode kehadiran */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-ember/80">
+            <label className="mb-1 block text-sm font-medium text-white">
               Mode Kehadiran
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -352,7 +352,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
 
           {/* Upload foto */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-ember/80">
+            <label className="mb-1 block text-sm font-medium text-white">
               {mode === "online" ? "Screenshot Zoom" : "Bukti foto kehadiran"}
             </label>
             <input

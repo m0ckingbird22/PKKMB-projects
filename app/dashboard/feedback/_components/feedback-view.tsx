@@ -123,7 +123,7 @@ export function FeedbackView({ records, day, stats }: Props) {
         ) : (
           <div className="overflow-x-auto rounded-lg border border-gray-800 bg-[#1d1c1c]">
             <table className="min-w-full divide-y divide-gray-800">
-              <thead className="bg-gray-800/50">
+              <thead className="bg-[#454444]">
                 <tr>
                   <th className={TH_BASE}>No</th>
                   <th className={TH_BASE}>Nama</th>
