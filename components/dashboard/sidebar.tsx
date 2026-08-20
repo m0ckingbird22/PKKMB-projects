@@ -57,20 +57,20 @@ export function Sidebar({
       {/* Brand */}
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-800 px-3 gap-2">
         <div className="flex shrink-0 items-center justify-center">
-          {(isMobile || !collapsed) ? (
+          {isMobile || !collapsed ? (
             <Image
               src="/cak-u-logo.png"
               alt="Logo PKKMB"
-              width={110}
-              height={60}
+              width={140}
+              height={50}
               className="rounded-lg object-cover"
             />
           ) : (
             <Image
               src="/logo.png"
               alt="Logo Cakrawala"
-              width={32}
-              height={32}
+              width={40}
+              height={40}
               className="object-contain"
             />
           )}
@@ -138,7 +138,7 @@ export function Sidebar({
           </button>
         )}
 
-        {(!isMobile && collapsed) ? (
+        {!isMobile && collapsed ? (
           <div className="flex flex-col items-center gap-2 pt-1">
             <div
               title={`${panitiaName} (${panitiaRole})`}
