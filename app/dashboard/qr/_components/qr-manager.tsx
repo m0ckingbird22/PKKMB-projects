@@ -1,10 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "react-hot-toast";
-import { Plus, StopCircle, Loader2, Trash2 } from "lucide-react";
+import {
+  Plus,
+  StopCircle,
+  Loader2,
+  Trash2,
+  Copy,
+  Check,
+  Printer,
+} from "lucide-react";
 import { DayPicker } from "@/components/dashboard/day-picker";
 
 type Session = {
@@ -85,6 +93,99 @@ export function QrManager({ sessions: initial, origin }: Props) {
     }
   };
 
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const copyLink = async (s: Session) => {
+    try {
+      await navigator.clipboard.writeText(sessionUrl(s));
+      setCopiedId(s.id);
+      toast.success("Link disalin");
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (e) {
+      console.error("Gagal menyalin link", e);
+      toast.error("Gagal menyalin link");
+    }
+  };
+
+  const printSession = (s: Session, e: MouseEvent<HTMLButtonElement>) => {
+    const card = e.currentTarget.closest("[data-qr-card]");
+    const svg = card?.querySelector("svg");
+    if (!svg) {
+      toast.error("QR tidak ditemukan");
+      return;
+    }
+
+    const printWindow = window.open("", "_blank", "width=420,height=560");
+    if (!printWindow) {
+      toast.error("Popup diblokir browser, izinkan popup untuk print");
+      return;
+    }
+
+    printWindow.document.write(`
+  <html>
+    <head>
+      <title>${s.token}</title>
+      <style>
+        * { box-sizing: border-box; }
+        body {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          margin: 0;
+          font-family: system-ui, sans-serif;
+          gap: 16px;
+        }
+        .logo-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 20px;
+        }
+        .logo-row img {
+          height: 120px;
+          width: auto;
+          display: block;
+        }
+        svg { width: 280px; height: 280px; }
+        .badge {
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: #92400e;
+          background: #fef3c7;
+          padding: 4px 10px;
+          border-radius: 999px;
+        }
+        h1 { font-size: 20px; margin: 0; font-family: monospace; }
+        p { color: #555; margin: 0; font-size: 13px; }
+        @media print {
+          @page { margin: 1cm; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="logo-row">
+        <img src="${origin}/logo-spark-hitam.png" alt="Logo Spark" />
+        <img src="${origin}/logo.png" alt="Logo Cakrawala" />
+      </div>
+      <span class="badge">${s.type === "feedback" ? "Feedback" : "Absensi"}</span>
+      ${svg.outerHTML}
+      <h1>${s.token}</h1>
+      <p style="font-weight: bold;">Day ${s.day}</p>
+    </body>
+  </html>
+`);
+    printWindow.document.close();
+
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+    }, 300);
+  };
+
   return (
     <div className="space-y-6">
       {/* Tombol buat sesi */}
@@ -159,6 +260,7 @@ export function QrManager({ sessions: initial, origin }: Props) {
             {active.map((s) => (
               <div
                 key={s.id}
+                data-qr-card
                 className="bg-[#1d1c1c] rounded-lg border border-gray-800 p-6 space-y-4"
               >
                 <div className="flex justify-center bg-white p-4 rounded-lg">
@@ -180,6 +282,27 @@ export function QrManager({ sessions: initial, origin }: Props) {
                     })}
                   </p>
                 </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => copyLink(s)}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-sm text-gray-300 hover:border-twilight hover:text-white"
+                  >
+                    {copiedId === s.id ? (
+                      <Check className="h-4 w-4 text-green-400" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                    {copiedId === s.id ? "Tersalin" : "Salin Link"}
+                  </button>
+                  <button
+                    onClick={(e) => printSession(s, e)}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-sm text-gray-300 hover:border-twilight hover:text-white"
+                  >
+                    <Printer className="h-4 w-4" /> Cetak PDF
+                  </button>
+                </div>
+
                 <button
                   onClick={() => endSession(s.id)}
                   className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-inferno px-3 py-2 text-sm text-inferno hover:bg-inferno hover:text-white"
