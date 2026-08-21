@@ -34,7 +34,7 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-black px-4">
-      <div className="bg-[#1d1c1c] p-6 sm:p-8 rounded-lg border border-gray-800 w-full max-w-md">
+      <div className="bg-[#1d1c1c] p-6 sm:p-8 rounded-lg border border-gray-500 w-full max-w-md">
         <div className="flex justify-center mb-4">
           <Image
             src="/logo.png"
