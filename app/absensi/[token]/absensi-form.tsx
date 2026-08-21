@@ -14,6 +14,56 @@ interface StudentResult {
   prodi_nama: string;
 }
 
+// Target kompresi semua foto (kamera & galeri): sisi terpanjang 1080px, JPEG q0.7
+const MAX_DIM = 1080;
+const JPEG_QUALITY = 0.7;
+
+function compressImage(file: File): Promise<File | null> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(
+        1,
+        MAX_DIM / Math.max(img.naturalWidth, img.naturalHeight),
+      );
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.naturalWidth * scale);
+      canvas.height = Math.round(img.naturalHeight * scale);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(null);
+        return;
+      }
+      // PNG transparan jadi hitam kalau langsung dikonversi ke JPEG
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            resolve(null);
+            return;
+          }
+          resolve(
+            new File([blob], `absensi-${Date.now()}.jpg`, {
+              type: "image/jpeg",
+            }),
+          );
+        },
+        "image/jpeg",
+        JPEG_QUALITY,
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    };
+    img.src = url;
+  });
+}
+
 export default function AbsensiForm({ day, token }: AbsensiFormProps) {
   // State pencarian nama
   const [query, setQuery] = useState("");
@@ -57,7 +107,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
       setCameraOpen(true);
     } catch {
       setCameraError(
-        "Tidak bisa mengakses kamera. Beri izin kamera di browser, atau gunakan tombol galeri.",
+        "Tidak bisa mengakses kamera. Beri izin kamera di browser, lalu coba lagi.",
       );
     }
   }
@@ -82,7 +132,6 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
     const video = videoRef.current;
     if (!video || !video.videoWidth) return;
 
-    const MAX_DIM = 1080;
     const scale = Math.min(
       1,
       MAX_DIM / Math.max(video.videoWidth, video.videoHeight),
@@ -110,7 +159,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
         closeCamera();
       },
       "image/jpeg",
-      0.7,
+      JPEG_QUALITY,
     );
   }
 
@@ -156,7 +205,7 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
     setQuery("");
   }
 
-  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     // Cek yang sama dengan server: wajib gambar, maks 5 MB
@@ -171,8 +220,15 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
       return;
     }
     setErrorMsg(null);
-    setPhoto(file);
-    setPhotoPreview(URL.createObjectURL(file));
+
+    // Kompresi jalur galeri biar ukurannya sama dengan jalur kamera.
+    // Kalau hasil kompresi malah lebih besar, pakai file asli.
+    const compressed = await compressImage(file);
+    const finalFile =
+      compressed && compressed.size < file.size ? compressed : file;
+
+    setPhoto(finalFile);
+    setPhotoPreview(URL.createObjectURL(finalFile));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -389,14 +445,16 @@ export default function AbsensiForm({ day, token }: AbsensiFormProps) {
                     Buka Kamera
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-700 py-2.5 text-sm font-medium text-gray-300 transition hover:border-twilight hover:text-white"
-                >
-                  <ImageIcon className="h-4 w-4" />
-                  {mode === "online" ? "Pilih Screenshot" : "Galeri"}
-                </button>
+                {mode === "online" && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-700 py-2.5 text-sm font-medium text-gray-300 transition hover:border-twilight hover:text-white"
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                    Pilih Screenshot
+                  </button>
+                )}
               </div>
             )}
             {cameraError && (
