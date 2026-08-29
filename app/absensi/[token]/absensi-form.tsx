@@ -14,9 +14,9 @@ interface StudentResult {
   prodi_nama: string;
 }
 
-// Target kompresi semua foto (kamera & galeri): sisi terpanjang 1080px, JPEG q0.7
+// Target kompresi semua foto (kamera & galeri): sisi terpanjang 1080px, JPEG q0.6
 const MAX_DIM = 1080;
-const JPEG_QUALITY = 0.7;
+const JPEG_QUALITY = 0.6;
 
 function compressImage(file: File): Promise<File | null> {
   return new Promise((resolve) => {
