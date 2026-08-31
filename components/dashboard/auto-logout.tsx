@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 
 // Ubah angka ini kalau mau durasi idle yang beda
-const IDLE_LIMIT_MS = 5 * 60 * 1000; // 5 menit tanpa aktivitas
+const IDLE_LIMIT_MS = 10 * 60 * 1000; // 5 menit tanpa aktivitas
 const CHECK_INTERVAL_MS = 30 * 1000; // cek tiap 30 detik
 
 // Aktivitas apa saja yang dianggap "masih pegang device"
